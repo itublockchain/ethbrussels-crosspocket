@@ -1,0 +1,3 @@
+[submodule "backend/lib/pancake-v4-hooks-template"]
+	path = backend/lib/pancake-v4-hooks-template
+	url = https://github.com/pancakeswap/pancake-v4-hooks-template
