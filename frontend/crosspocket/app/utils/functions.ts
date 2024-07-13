@@ -1,3 +1,4 @@
+"use client";
 import { W3SSdk } from "@circle-fin/w3s-pw-web-sdk";
 import { v4 as uuidv4 } from "uuid";
 
