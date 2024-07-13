@@ -9,7 +9,7 @@ contract Approve is Script {
     address public lpRouter = address(0xff80e212A63059B8d904104a7d58baa4fB00D30E);
     function run() external {
         vm.broadcast();
-        IERC20(USDC).approve(address(lpRouter), 10000000);
+        IERC20(USDC).approve(address(lpRouter), type(uint256).max);
         
     }
 }

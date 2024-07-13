@@ -12,3 +12,9 @@ createPool:
 	forge script script/CreatePool.s.sol:CreatePool --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast	
 approve:
 	forge script script/Test/Approve.s.sol:Approve --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast
+initialize:
+	forge script script/Test/PoolInitialize.s.sol:PoolInitialize --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast
+liq:
+	forge script script/Test/PoolLiq.s.sol:PoolLiq --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast
+swap:
+	forge script script/Test/Swap.s.sol:Swap --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast
