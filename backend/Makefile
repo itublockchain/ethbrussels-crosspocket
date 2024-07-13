@@ -10,3 +10,5 @@ addLiquidity:
 	forge script script/AddLiquidity.s.sol:AddLiquidity --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast
 createPool:
 	forge script script/CreatePool.s.sol:CreatePool --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast	
+approve:
+	forge script script/Test/Approve.s.sol:Approve --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast

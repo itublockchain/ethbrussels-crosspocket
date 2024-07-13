@@ -40,7 +40,7 @@ contract AddLiquidity is Script {
 
         // approve tokens to the LP Router
         vm.broadcast();
-        IERC20(token0).approve(address(lpRouter), 10000);
+        IERC20(token0).approve(address(lpRouter), 10000000);
         vm.broadcast();
         IERC20(token1).approve(address(lpRouter), 1e18);
 
