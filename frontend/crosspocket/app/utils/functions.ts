@@ -1,4 +1,3 @@
-// utils/functions.ts
 import { W3SSdk } from "@circle-fin/w3s-pw-web-sdk";
 
 export const getAppId = async (setAppIdnew) => {
@@ -207,7 +206,7 @@ export const initiateTransfer = async (e, idempotencyKey, userId, destinationAdd
   }
 };
 
-export const confirmTransaction = async (e, sdk, appId, userToken, encryptionKey, challengeId, toast, setConfirmResponse) => {
+export const confirmTransaction = async (e, sdk, appId,userToken, encryptionKey, setConfirmResponse, challengeId,toast) => {
   e.preventDefault();
   try {
     if (!sdk) {
@@ -233,5 +232,34 @@ export const confirmTransaction = async (e, sdk, appId, userToken, encryptionKey
   } catch (error) {
     console.error("Error confirming transaction:", error.message);
     toast.error("An error occurred while confirming the transaction.");
+  }
+};
+
+export const confirmExecution = async (e, sdk, appId, userToken, encryptionKey, setExecutionResponse, challengeId, toast) => {
+  e.preventDefault();
+  try {
+    if (!sdk) {
+      sdk = new W3SSdk();
+    }
+
+    sdk.setAppSettings({ appId });
+
+    sdk.setAuthentication({
+      userToken,
+      encryptionKey,
+    });
+
+    sdk.execute(challengeId, (error, result) => {
+      if (error) {
+        toast.error(`Error: ${error?.message ?? "Error!"}`);
+        return;
+      }
+      toast.success(`Execution confirmed: ${result?.type}, Status: ${result?.status}`);
+      console.log("Execution confirmed: ", result);
+      setExecutionResponse(result);
+    });
+  } catch (error) {
+    console.error("Error confirming execution:", error.message);
+    toast.error("An error occurred while confirming the execution.");
   }
 };
