@@ -18,3 +18,5 @@ liq:
 	forge script script/Test/PoolLiq.s.sol:PoolLiq --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast
 swap:
 	forge script script/Test/Swap.s.sol:Swap --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast
+swapP:
+	forge script script/Test/pancakeswapSwap.s.sol:pancakeswapSwap --fork-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast
