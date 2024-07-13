@@ -2,7 +2,7 @@ import axios from 'axios';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
-  const { idempotencyKey, userToken, blockchains } = await req.json();
+  const { idempotencyKey, userToken } = await req.json();
 
   const options = {
     method: 'POST',
@@ -12,7 +12,7 @@ export async function POST(req) {
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_CIRCLE_API_KEY}`,
       'X-User-Token': userToken
     },
-    data: { idempotencyKey, blockchains }
+    data: { idempotencyKey, blockchains:["ETH-SEPOLIA"] }
   };
 
   try {
