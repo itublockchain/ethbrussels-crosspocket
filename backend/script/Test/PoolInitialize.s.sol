@@ -25,11 +25,11 @@ contract PoolInitialize is Script {
 
     PoolModifyLiquidityTest lpRouter =
         PoolModifyLiquidityTest(
-            address(0xff80e212A63059B8d904104a7d58baa4fB00D30E)
+            address(0xa46ff840Dbb261e347606b3733C91c5b3bdcA65d)
         );
 
     function run() external {
-        IPoolManager manager = IPoolManager(0x61d810C745E3cFa17659A64d68824137c7b9625E);
+        IPoolManager manager = IPoolManager(0x9C430DBdf1936AA36154e2046bb91C065Aa0107B);
 
         address token0 = address(SEPOLIA_USDC);
         address token1 = address(SEPOLIA_WETH);

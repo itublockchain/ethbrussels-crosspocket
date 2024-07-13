@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "forge-std/Script.sol";
 import { PoolManager } from "v4-core/PoolManager.sol";
 
-contract DeployContracts is Script {
+contract DeployPoolManager is Script {
     function run() external {
         vm.startBroadcast();
 

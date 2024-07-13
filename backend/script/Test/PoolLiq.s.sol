@@ -13,7 +13,7 @@ import {PoolId, PoolIdLibrary} from "v4-core/types/PoolId.sol";
 
 contract PoolLiq is Script {
     PoolModifyLiquidityTest lpRouter =
-        PoolModifyLiquidityTest(0xff80e212A63059B8d904104a7d58baa4fB00D30E);
+        PoolModifyLiquidityTest(0xa46ff840Dbb261e347606b3733C91c5b3bdcA65d);
     address token0 = address(0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238);
     address token1 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
     address hookAddress = address(address(0));
@@ -55,9 +55,9 @@ contract PoolLiq is Script {
         console.log("Approve tokens to LP Router", address(this));
 
         // Provide 10e18 worth of liquidity on the range of [-600, 600]
-        int24 tickLower = -600;
-        int24 tickUpper = 600;
-        int256 liquidity = 0.000000000001e18;
+        int24 tickLower = -200;
+        int24 tickUpper = 200;
+        int256 liquidity = 0.000000001e18;
 
         vm.broadcast();
         lpRouter.modifyLiquidity(
@@ -72,6 +72,4 @@ contract PoolLiq is Script {
         );
         console.log("dfd");
     }
-
-    
 }

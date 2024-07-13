@@ -15,7 +15,7 @@ import {TickMath} from "v4-core/libraries/TickMath.sol";
 
 contract Swap is Script {
     PoolSwapTest swapRouter =
-        PoolSwapTest(0x6f41d083B4C66aaDB6b4422B8b1De65d6177324A);
+        PoolSwapTest(0x8994D977ffd78f69f39EDC51d1C130F6371f62aB);
 
     // slippage tolerance to allow for unlimited price impact
     uint160 public constant MIN_PRICE_LIMIT = TickMath.MIN_SQRT_PRICE + 1;
@@ -41,12 +41,12 @@ contract Swap is Script {
         IERC20(token1).approve(address(swapRouter), type(uint256).max);
         vm.broadcast();
         IERC20(token0).approve(
-            address(0x61d810C745E3cFa17659A64d68824137c7b9625E),
+            address(0x9C430DBdf1936AA36154e2046bb91C065Aa0107B),
             type(uint256).max
         );
         vm.broadcast();
         IERC20(token1).approve(
-            address(0x61d810C745E3cFa17659A64d68824137c7b9625E),
+            address(0x9C430DBdf1936AA36154e2046bb91C065Aa0107B),
             type(uint256).max
         );
 
