@@ -40,9 +40,7 @@ export const createNewUser = async () => {
   }
 };
 
-export const createSessionToken = async (e,) => {
-  e.preventDefault();
-
+export const createSessionToken = async () => {
   const userId = localStorage.getItem("userId");
 
   if (!userId) {
@@ -80,18 +78,16 @@ export const initializeAccount = async () => {
       }),
     });
     const result = await res.json();
-    localStorage.setItem("initializeAccountChallengeId", result.data.challengeId);
+    localStorage.setItem(
+      "initializeAccountChallengeId",
+      result.data.challengeId
+    );
   } catch (error) {
     console.error(error);
   }
 };
 
-export const executeChallenge = async (
-  e,
-  sdk,
-  appId,
-  toast
-) => {
+export const executeChallenge = async (e, sdk, appId, toast) => {
   e.preventDefault();
   const userToken = localStorage.getItem("userToken");
   const encryptionKey = localStorage.getItem("encryptionKey");
@@ -118,12 +114,7 @@ export const executeChallenge = async (
   }
 };
 
-export const fetchWalletData = async (
-  e,
-  setError,
-) => {
-  e.preventDefault();
-  setError("");
+export const fetchWalletData = async () => {
   const userToken = localStorage.getItem("userToken");
 
   try {
@@ -140,12 +131,12 @@ export const fetchWalletData = async (
       throw new Error(data.error || "An error occurred");
     }
     const wallet = data.data.wallets[0];
+    console.log("Wallet data fetched: ", data);
     localStorage.setItem("walletId", wallet.id);
     localStorage.setItem("walletAddress", wallet.address);
     localStorage.setItem("blockchain", wallet.blockchain);
   } catch (error) {
     console.error(error);
-    setError(error.message);
   }
 };
 
@@ -175,10 +166,7 @@ export const fundWallet = async (e, setError, setFundResponse) => {
   }
 };
 
-export const getWalletBalances = async (
-  e,
-  setError,
-) => {
+export const getWalletBalances = async (e, setError) => {
   e.preventDefault();
   setError("");
 
@@ -196,11 +184,14 @@ export const getWalletBalances = async (
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.error || "An error occurred");
-    };
+    }
     data.data.tokenBalances.forEach((balance, index) => {
       localStorage.setItem(`token_${index}_amount`, balance.amount);
       localStorage.setItem(`token_${index}_id`, balance.token.id);
-      localStorage.setItem(`token_${index}_blockchain`, balance.token.blockchain);
+      localStorage.setItem(
+        `token_${index}_blockchain`,
+        balance.token.blockchain
+      );
       localStorage.setItem(`token_${index}_name`, balance.token.name);
       localStorage.setItem(`token_${index}_symbol`, balance.token.symbol);
       localStorage.setItem(`token_${index}_decimals`, balance.token.decimals);
@@ -217,7 +208,7 @@ export const initiateTransfer = async (
   destinationAddress,
   refId,
   amounts,
-  setError,
+  setError
 ) => {
   e.preventDefault();
   setError("");
