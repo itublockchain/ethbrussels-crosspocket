@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { W3SSdk } from "@circle-fin/w3s-pw-web-sdk";
@@ -27,6 +27,7 @@ export default function Home() {
   const [amounts, setAmounts] = useState([""]);
   const [activeButton, setActiveButton] = useState(null);
   const [price, setPrice] = useState<number>(0);
+  const [balances, setBalances] = useState([]);
 
   const {
     data: pricefeed,
@@ -59,49 +60,20 @@ export default function Home() {
         : "bg-[#6E78CE] text-white"
     }`;
 
-  let sdk: W3SSdk;
+  useEffect(() => {
+    const fetchBalances = async () => {
+      await getWalletBalances(setBalances);
+    };
 
-  1;
-  // const confirmTransaction = useCallback(
-  //   async (e) => {
-  //     e.preventDefault();
-  //     try {
-  //       if (!sdk) {
-  //         sdk = new W3SSdk();
-  //       }
-
-  //       sdk.setAppSettings({ appId });
-
-  //       sdk.setAuthentication({
-  //         userToken,
-  //         encryptionKey,
-  //       });
-
-  //       sdk.execute(challengeId, (error, result) => {
-  //         if (error) {
-  //           toast.error(`Error: ${error?.message ?? "Error!"}`);
-  //           return;
-  //         }
-  //         toast.success(
-  //           `Transaction confirmed: ${result?.type}, Status: ${result?.status}`
-  //         );
-  //         console.log("Transaction confirmed: ", result);
-  //         setConfirmResponse(result);
-  //       });
-  //     } catch (error) {
-  //       console.error("Error confirming transaction:", error.message);
-  //       toast.error("An error occurred while confirming the transaction.");
-  //     }
-  //   },
-  //   [appId, userToken, encryptionKey, challengeId]
-  // );
+    fetchBalances();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[url('/page.png')] bg-cover bg-center justify-center items-center flex">
       <div className="bg-white w-[800px] h-[730px] flex justify-center items-center border-[#18227B] border-4 rounded-2xl">
         <div className="bg-white w-[770px] h-[700px] flex items-center border-[#18227B] border-4 rounded-2xl flex-col space-y-8 pt-14">
           <h1 className="text-5xl font-bold text-[#4757E4]">
-            3.5118 SepoliaETH
+            {balances[0]?.amount ?? 0} {balances[0]?.symbol ?? "Token"}
           </h1>
           <div className="flex space-x-8">
             <button
@@ -125,7 +97,7 @@ export default function Home() {
           </div>
           <div className="flex justify-center flex-col items-center space-y-4">
             <h1 className="text-black text-3xl">
-            Recommended Price: {newPriceFeed * price} USDC
+              Recommended Price: {newPriceFeed * price} USDC
             </h1>
             <h1 className="text-black w-64 h-10 bg-[#ACB3F8] text-center items-center flex justify-center rounded-2xl text-xl font-bold">
               Output:{" "}

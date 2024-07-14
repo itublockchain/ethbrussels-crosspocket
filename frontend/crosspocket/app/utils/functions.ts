@@ -177,10 +177,7 @@ export const fundWallet = async (e, setError, setFundResponse) => {
   }
 };
 
-export const getWalletBalances = async (e, setError) => {
-  e.preventDefault();
-  setError("");
-
+export const getWalletBalances = async (setBalances) => {
   const walletId = safeGetItem("walletId");
 
   try {
@@ -196,20 +193,24 @@ export const getWalletBalances = async (e, setError) => {
     if (!response.ok) {
       throw new Error(data.error || "An error occurred");
     }
-    data.data.tokenBalances.forEach((balance, index) => {
-      safeSetItem(`token_${index}_amount`, balance.amount);
-      safeSetItem(`token_${index}_id`, balance.token.id);
-      safeSetItem(`token_${index}_blockchain`, balance.token.blockchain);
-      safeSetItem(`token_${index}_name`, balance.token.name);
-      safeSetItem(`token_${index}_symbol`, balance.token.symbol);
-      safeSetItem(`token_${index}_decimals`, balance.token.decimals);
-      safeSetItem(`token_${index}_updateDate`, balance.updateDate);
-    });
+
+    // Sadece ilk token'ı alıyoruz
+    const tokenBalances = data.data.tokenBalances.map((balance, index) => ({
+      amount: balance.amount,
+      id: balance.token.id,
+      blockchain: balance.token.blockchain,
+      name: balance.token.name,
+      symbol: balance.token.symbol,
+      decimals: balance.token.decimals,
+      updateDate: balance.updateDate,
+    }));
+
+    setBalances(tokenBalances);
   } catch (error) {
     console.error(error);
-    setError(error.message);
   }
 };
+
 
 export const initiateTransfer = async (
   e,

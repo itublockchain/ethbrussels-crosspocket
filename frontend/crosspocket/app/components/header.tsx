@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import Image from "next/image";
 import {
   createNewUser,
@@ -7,6 +7,7 @@ import {
   initializeAccount,
   executeChallenge,
   fetchWalletData,
+  getWalletBalances,
 } from "../utils/functions";
 import { W3SSdk } from "@circle-fin/w3s-pw-web-sdk";
 import { toast, ToastContainer } from "react-toastify";
@@ -60,7 +61,7 @@ const Header = () => {
           );
           console.error("Error in fetching wallet data:", error);
         }
-      }, 20000);
+      }, 30000);
     } catch (error) {
       toast.error(`An error occurred: ${error.message}`);
       console.error("Error in account creation process:", error);
