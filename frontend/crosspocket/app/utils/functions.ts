@@ -1,22 +1,43 @@
+"use client";
 import { W3SSdk } from "@circle-fin/w3s-pw-web-sdk";
+import { v4 as uuidv4 } from "uuid";
 
-export const getAppId = async (setAppIdnew) => {
-  try {
-    const response = await fetch("/api/appId");
-    const result = await response.json();
-    if (result && result.data && result.data.appId) {
-      setAppIdnew(result.data.appId);
-      console.log("AppId: " + result.data.appId);
-    } else {
-      console.error("appId not found in data");
-    }
-  } catch (error) {
-    console.error("Error fetching appId:", error);
+export const generateUUID = () => {
+  return uuidv4();
+};
+
+// Helper functions for localStorage
+const safeGetItem = (key) => {
+  if (typeof window !== "undefined" && window.localStorage) {
+    return window.localStorage.getItem(key);
+  }
+  return null;
+};
+
+const safeSetItem = (key, value) => {
+  if (typeof window !== "undefined" && window.localStorage) {
+    window.localStorage.setItem(key, value);
   }
 };
 
-export const createNewUser = async (e, userId, setResponseUserId) => {
-  e.preventDefault();
+// export const getAppId = async (setAppIdnew) => {
+//   try {
+//     const response = await fetch("/api/appId");
+//     const result = await response.json();
+//     if (result && result.data && result.data.appId) {
+//       setAppIdnew(result.data.appId);
+//       console.log("AppId: " + result.data.appId);
+//     } else {
+//       console.error("appId not found in data");
+//     }
+//   } catch (error) {
+//     console.error("Error fetching appId:", error);
+//   }
+// };
+
+export const createNewUser = async () => {
+  const userId = uuidv4();
+
   try {
     const res = await fetch("/api/users", {
       method: "POST",
@@ -26,15 +47,20 @@ export const createNewUser = async (e, userId, setResponseUserId) => {
       body: JSON.stringify({ userId }),
     });
     const result = await res.json();
-    setResponseUserId(result);
+    safeSetItem("userId", userId);
+    console.log("User created: ", result);
   } catch (error) {
     console.error(error);
-    setResponseUserId({ error: "An error occurred" });
   }
 };
 
-export const createSessionToken = async (e, userId, setTokenResponse) => {
-  e.preventDefault();
+export const createSessionToken = async () => {
+  const userId = safeGetItem("userId");
+
+  if (!userId) {
+    console.error("User ID not found in storage");
+    return;
+  }
   try {
     const res = await fetch("/api/session-token", {
       method: "POST",
@@ -44,15 +70,16 @@ export const createSessionToken = async (e, userId, setTokenResponse) => {
       body: JSON.stringify({ userId }),
     });
     const result = await res.json();
-    setTokenResponse(result);
+    safeSetItem("userToken", result.data.userToken);
+    safeSetItem("encryptionKey", result.data.encryptionKey);
   } catch (error) {
     console.error(error);
-    setTokenResponse({ error: "An error occurred" });
   }
 };
 
-export const initializeAccount = async (e, userToken, idempotencyKey, blockchain, setAccountResponse) => {
-  e.preventDefault();
+export const initializeAccount = async () => {
+  const idempotencyKey = generateUUID();
+  const userToken = safeGetItem("userToken");
   try {
     const res = await fetch("/api/users/initialize", {
       method: "POST",
@@ -62,19 +89,20 @@ export const initializeAccount = async (e, userToken, idempotencyKey, blockchain
       body: JSON.stringify({
         userToken,
         idempotencyKey,
-        blockchains: [blockchain],
       }),
     });
     const result = await res.json();
-    setAccountResponse(result);
+    safeSetItem("initializeAccountChallengeId", result.data.challengeId);
   } catch (error) {
     console.error(error);
-    setAccountResponse({ error: "An error occurred" });
   }
 };
 
-export const executeChallenge = async (e, sdk, appId, userToken, encryptionKey, challengeId, toast) => {
+export const executeChallenge = async (e, sdk, appId, toast) => {
   e.preventDefault();
+  const userToken = safeGetItem("userToken");
+  const encryptionKey = safeGetItem("encryptionKey");
+  const challengeId = safeGetItem("initializeAccountChallengeId");
   try {
     if (!sdk) {
       sdk = new W3SSdk();
@@ -97,10 +125,8 @@ export const executeChallenge = async (e, sdk, appId, userToken, encryptionKey, 
   }
 };
 
-export const fetchWalletData = async (e, userToken, setError, setWalletData) => {
-  e.preventDefault();
-  setError("");
-  setWalletData(null);
+export const fetchWalletData = async () => {
+  const userToken = safeGetItem("userToken");
 
   try {
     const response = await fetch("/api/checkWalletStatus", {
@@ -115,17 +141,21 @@ export const fetchWalletData = async (e, userToken, setError, setWalletData) => 
     if (!response.ok) {
       throw new Error(data.error || "An error occurred");
     }
-    setWalletData(data);
+    const wallet = data.data.wallets[0];
+    console.log("Wallet data fetched: ", data);
+    safeSetItem("walletId", wallet.id);
+    safeSetItem("walletAddress", wallet.address);
+    safeSetItem("blockchain", wallet.blockchain);
   } catch (error) {
     console.error(error);
-    setError(error.message);
   }
 };
 
-export const fundWallet = async (e, address, setError, setFundResponse) => {
+export const fundWallet = async (e, setError, setFundResponse) => {
   e.preventDefault();
   setError("");
   setFundResponse(null);
+  const address = safeGetItem("walletAddress");
 
   try {
     const response = await fetch("/api/fundWallet", {
@@ -147,10 +177,8 @@ export const fundWallet = async (e, address, setError, setFundResponse) => {
   }
 };
 
-export const getWalletBalances = async (e, walletId, setError, setWalletBalances) => {
-  e.preventDefault();
-  setError("");
-  setWalletBalances(null);
+export const getWalletBalances = async (setBalances) => {
+  const walletId = safeGetItem("walletId");
 
   try {
     const response = await fetch("/api/getWalletBalance", {
@@ -165,17 +193,39 @@ export const getWalletBalances = async (e, walletId, setError, setWalletBalances
     if (!response.ok) {
       throw new Error(data.error || "An error occurred");
     }
-    setWalletBalances(data);
+
+    // Sadece ilk token'ı alıyoruz
+    const tokenBalances = data.data.tokenBalances.map((balance, index) => ({
+      amount: balance.amount,
+      id: balance.token.id,
+      blockchain: balance.token.blockchain,
+      name: balance.token.name,
+      symbol: balance.token.symbol,
+      decimals: balance.token.decimals,
+      updateDate: balance.updateDate,
+    }));
+
+    setBalances(tokenBalances);
   } catch (error) {
     console.error(error);
-    setError(error.message);
   }
 };
 
-export const initiateTransfer = async (e, idempotencyKey, userId, destinationAddress, refId, amounts, tokenId, walletId, userToken, setError, setTransferResponse) => {
+
+export const initiateTransfer = async (
+  e,
+  destinationAddress,
+  refId,
+  amounts,
+  setError
+) => {
   e.preventDefault();
   setError("");
-  setTransferResponse(null);
+  const userId = safeGetItem("userId");
+  const idempotencyKey = generateUUID();
+  const walletId = safeGetItem("walletId");
+  const userToken = safeGetItem("userToken");
+  const tokenId = safeGetItem(`token_${1}_id`);
 
   try {
     const response = await fetch("/api/transfer", {
@@ -199,67 +249,50 @@ export const initiateTransfer = async (e, idempotencyKey, userId, destinationAdd
     if (!response.ok) {
       throw new Error(data.error || "An error occurred");
     }
-    setTransferResponse(data);
+    safeSetItem("transferChallengeId", data.data.challengeId);
   } catch (error) {
     console.error(error);
     setError(error.message);
   }
 };
 
-export const confirmTransaction = async (e, sdk, appId,userToken, encryptionKey, setConfirmResponse, challengeId,toast) => {
-  e.preventDefault();
-  try {
-    if (!sdk) {
-      sdk = new W3SSdk();
-    }
+// contract execution onaylamak için kullanılan fonksiyon
+// export const confirmExecution = async (
+//   e,
+//   sdk,
+//   appId,
+//   userToken,
+//   encryptionKey,
+//   setExecutionResponse,
+//   challengeId,
+//   toast
+// ) => {
+//   e.preventDefault();
+//   try {
+//     if (!sdk) {
+//       sdk = new W3SSdk();
+//     }
 
-    sdk.setAppSettings({ appId });
+//     sdk.setAppSettings({ appId });
 
-    sdk.setAuthentication({
-      userToken,
-      encryptionKey,
-    });
+//     sdk.setAuthentication({
+//       userToken,
+//       encryptionKey,
+//     });
 
-    sdk.execute(challengeId, (error, result) => {
-      if (error) {
-        toast.error(`Error: ${error?.message ?? "Error!"}`);
-        return;
-      }
-      toast.success(`Transaction confirmed: ${result?.type}, Status: ${result?.status}`);
-      console.log("Transaction confirmed: ", result);
-      setConfirmResponse(result);
-    });
-  } catch (error) {
-    console.error("Error confirming transaction:", error.message);
-    toast.error("An error occurred while confirming the transaction.");
-  }
-};
-
-export const confirmExecution = async (e, sdk, appId, userToken, encryptionKey, setExecutionResponse, challengeId, toast) => {
-  e.preventDefault();
-  try {
-    if (!sdk) {
-      sdk = new W3SSdk();
-    }
-
-    sdk.setAppSettings({ appId });
-
-    sdk.setAuthentication({
-      userToken,
-      encryptionKey,
-    });
-
-    sdk.execute(challengeId, (error, result) => {
-      if (error) {
-        toast.error(`Error: ${error?.message ?? "Error!"}`);
-        return;
-      }
-      toast.success(`Execution confirmed: ${result?.type}, Status: ${result?.status}`);
-      console.log("Execution confirmed: ", result);
-      setExecutionResponse(result);
-    });
-  } catch (error) {
-    console.error("Error confirming execution:", error.message);
-    toast.error("An error occurred while confirming the execution.");
-  }
-};
+//     sdk.execute(challengeId, (error, result) => {
+//       if (error) {
+//         toast.error(`Error: ${error?.message ?? "Error!"}`);
+//         return;
+//       }
+//       toast.success(
+//         `Execution confirmed: ${result?.type}, Status: ${result?.status}`
+//       );
+//       console.log("Execution confirmed: ", result);
+//       setExecutionResponse(result);
+//     });
+//   } catch (error) {
+//     console.error("Error confirming execution:", error.message);
+//     toast.error("An error occurred while confirming the execution.");
+//   }
+// };
