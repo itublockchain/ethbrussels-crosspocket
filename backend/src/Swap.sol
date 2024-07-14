@@ -13,7 +13,7 @@ import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {PoolId, PoolIdLibrary} from "v4-core/types/PoolId.sol";
 import {TickMath} from "v4-core/libraries/TickMath.sol";
 
-contract Swap is Script {
+contract Swap {
     PoolSwapTest swapRouter =
         PoolSwapTest(0x8994D977ffd78f69f39EDC51d1C130F6371f62aB);
 
@@ -25,7 +25,7 @@ contract Swap is Script {
     address token1 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
     address hookAddr = address(0);
 
-    function run() external {
+    function swap(address recipient,int256 amountOut) external {
         PoolKey memory pool = PoolKey({
             currency0: Currency.wrap(token0),
             currency1: Currency.wrap(token1),
@@ -33,20 +33,14 @@ contract Swap is Script {
             tickSpacing: 10,
             hooks: IHooks(hookAddr)
         });
-
+         
         // approve tokens to the swap router
-        vm.broadcast();
-        IERC20(token0).approve(address(swapRouter), type(uint256).max);
-        vm.broadcast();
-        IERC20(token1).approve(address(swapRouter), type(uint256).max);
-        vm.broadcast();
-        IERC20(token0).approve(
-            address(0x9C430DBdf1936AA36154e2046bb91C065Aa0107B),
+        IERC20(token1).approve(
+            address(0x8994D977ffd78f69f39EDC51d1C130F6371f62aB),
             type(uint256).max
         );
-        vm.broadcast();
-        IERC20(token1).approve(
-            address(0x9C430DBdf1936AA36154e2046bb91C065Aa0107B),
+        IERC20(token0).approve(
+            address(0x8994D977ffd78f69f39EDC51d1C130F6371f62aB),
             type(uint256).max
         );
 
@@ -56,7 +50,7 @@ contract Swap is Script {
         bool zeroForOne = false;
         IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
             zeroForOne: zeroForOne,
-            amountSpecified: 1e6,
+            amountSpecified: amountOut,
             sqrtPriceLimitX96: zeroForOne ? MIN_PRICE_LIMIT : MAX_PRICE_LIMIT // unlimited impact
         });
 
@@ -66,7 +60,13 @@ contract Swap is Script {
             .TestSettings({takeClaims: false, settleUsingBurn: false});
 
         bytes memory hookData = new bytes(0); // no hook data on the hookless pool
-        vm.broadcast();
+        
         swapRouter.swap(pool, params, testSettings, hookData);
+        IERC20(token0).transfer(recipient, uint256(amountOut));
     }
+
+    function deposit() payable external {
+        
+    }
+    receive() external payable {}
 }
