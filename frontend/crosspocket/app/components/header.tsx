@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   createNewUser,
@@ -11,7 +11,30 @@ import {
 import { W3SSdk } from "@circle-fin/w3s-pw-web-sdk";
 import { toast, ToastContainer } from "react-toastify";
 
+// Helper functions for localStorage
+const safeGetItem = (key) => {
+  if (typeof window !== "undefined" && window.localStorage) {
+    return window.localStorage.getItem(key);
+  }
+  return null;
+};
+
+const safeSetItem = (key, value) => {
+  if (typeof window !== "undefined" && window.localStorage) {
+    window.localStorage.setItem(key, value);
+  }
+};
+
 const Header = () => {
+  const [walletAddress, setWalletAddress] = useState(null);
+
+  useEffect(() => {
+    const address = safeGetItem("walletAddress");
+    if (address) {
+      setWalletAddress(address);
+    }
+  }, []);
+
   const handleCreateAccount = async (e) => {
     e.preventDefault();
     try {
@@ -26,6 +49,10 @@ const Header = () => {
         try {
           await fetchWalletData();
           toast.success("Account created and wallet data fetched successfully");
+          const updatedAddress = safeGetItem("walletAddress");
+          if (updatedAddress) {
+            setWalletAddress(updatedAddress);
+          }
           window.location.reload();
         } catch (error) {
           toast.error(
@@ -39,8 +66,6 @@ const Header = () => {
       console.error("Error in account creation process:", error);
     }
   };
-
-  const walletAddress = localStorage.getItem("walletAddress");
 
   const formatAddress = (address) => {
     const maxLength = 16;
