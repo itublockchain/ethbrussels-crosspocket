@@ -33,7 +33,7 @@ export const createNewUser = async () => {
       body: JSON.stringify({ userId }),
     });
     const result = await res.json();
-    localStorage.setItem("userId", userId);
+    window?.localStorage.setItem("userId", userId);
     console.log("User created: ", result);
   } catch (error) {
     console.error(error);
@@ -41,7 +41,7 @@ export const createNewUser = async () => {
 };
 
 export const createSessionToken = async () => {
-  const userId = localStorage.getItem("userId");
+  const userId = window?.localStorage.getItem("userId");
 
   if (!userId) {
     console.error("User ID not found in storage");
@@ -56,8 +56,8 @@ export const createSessionToken = async () => {
       body: JSON.stringify({ userId }),
     });
     const result = await res.json();
-    localStorage.setItem("userToken", result.data.userToken);
-    localStorage.setItem("encryptionKey", result.data.encryptionKey);
+    window?.localStorage.setItem("userToken", result.data.userToken);
+    window?.localStorage.setItem("encryptionKey", result.data.encryptionKey);
   } catch (error) {
     console.error(error);
   }
@@ -65,7 +65,7 @@ export const createSessionToken = async () => {
 
 export const initializeAccount = async () => {
   const idempotencyKey = generateUUID();
-  const userToken = localStorage.getItem("userToken");
+  const userToken = window?.localStorage.getItem("userToken");
   try {
     const res = await fetch("/api/users/initialize", {
       method: "POST",
@@ -78,7 +78,7 @@ export const initializeAccount = async () => {
       }),
     });
     const result = await res.json();
-    localStorage.setItem(
+    window?.localStorage.setItem(
       "initializeAccountChallengeId",
       result.data.challengeId
     );
@@ -89,9 +89,9 @@ export const initializeAccount = async () => {
 
 export const executeChallenge = async (e, sdk, appId, toast) => {
   e.preventDefault();
-  const userToken = localStorage.getItem("userToken");
-  const encryptionKey = localStorage.getItem("encryptionKey");
-  const challengeId = localStorage.getItem("initializeAccountChallengeId");
+  const userToken = window?.localStorage.getItem("userToken");
+  const encryptionKey = window?.localStorage.getItem("encryptionKey");
+  const challengeId = window?.localStorage.getItem("initializeAccountChallengeId");
   try {
     if (!sdk) {
       sdk = new W3SSdk();
@@ -115,7 +115,7 @@ export const executeChallenge = async (e, sdk, appId, toast) => {
 };
 
 export const fetchWalletData = async () => {
-  const userToken = localStorage.getItem("userToken");
+  const userToken = window?.localStorage.getItem("userToken");
 
   try {
     const response = await fetch("/api/checkWalletStatus", {
@@ -132,9 +132,9 @@ export const fetchWalletData = async () => {
     }
     const wallet = data.data.wallets[0];
     console.log("Wallet data fetched: ", data);
-    localStorage.setItem("walletId", wallet.id);
-    localStorage.setItem("walletAddress", wallet.address);
-    localStorage.setItem("blockchain", wallet.blockchain);
+    window?.localStorage.setItem("walletId", wallet.id);
+    window?.localStorage.setItem("walletAddress", wallet.address);
+    window?.localStorage.setItem("blockchain", wallet.blockchain);
   } catch (error) {
     console.error(error);
   }
@@ -170,7 +170,7 @@ export const getWalletBalances = async (e, setError) => {
   e.preventDefault();
   setError("");
 
-  const walletId = localStorage.getItem("walletId");
+  const walletId = window?.localStorage.getItem("walletId");
 
   try {
     const response = await fetch("/api/getWalletBalance", {
@@ -186,16 +186,16 @@ export const getWalletBalances = async (e, setError) => {
       throw new Error(data.error || "An error occurred");
     }
     data.data.tokenBalances.forEach((balance, index) => {
-      localStorage.setItem(`token_${index}_amount`, balance.amount);
-      localStorage.setItem(`token_${index}_id`, balance.token.id);
-      localStorage.setItem(
+      window?.localStorage.setItem(`token_${index}_amount`, balance.amount);
+      window?.localStorage.setItem(`token_${index}_id`, balance.token.id);
+      window?.localStorage.setItem(
         `token_${index}_blockchain`,
         balance.token.blockchain
       );
-      localStorage.setItem(`token_${index}_name`, balance.token.name);
-      localStorage.setItem(`token_${index}_symbol`, balance.token.symbol);
-      localStorage.setItem(`token_${index}_decimals`, balance.token.decimals);
-      localStorage.setItem(`token_${index}_updateDate`, balance.updateDate);
+      window?.localStorage.setItem(`token_${index}_name`, balance.token.name);
+      window?.localStorage.setItem(`token_${index}_symbol`, balance.token.symbol);
+      window?.localStorage.setItem(`token_${index}_decimals`, balance.token.decimals);
+      window?.localStorage.setItem(`token_${index}_updateDate`, balance.updateDate);
     });
   } catch (error) {
     console.error(error);
@@ -212,11 +212,11 @@ export const initiateTransfer = async (
 ) => {
   e.preventDefault();
   setError("");
-  const userId = localStorage.getItem("userId");
+  const userId = window?.localStorage.getItem("userId");
   const idempotencyKey = generateUUID();
-  const walletId = localStorage.getItem("walletId");
-  const userToken = localStorage.getItem("userToken");
-  const tokenId = localStorage.getItem(`token_${1}_id`);
+  const walletId = window?.localStorage.getItem("walletId");
+  const userToken = window?.localStorage.getItem("userToken");
+  const tokenId = window?.localStorage.getItem(`token_${1}_id`);
 
   try {
     const response = await fetch("/api/transfer", {
@@ -240,7 +240,7 @@ export const initiateTransfer = async (
     if (!response.ok) {
       throw new Error(data.error || "An error occurred");
     }
-    localStorage.setItem("transferChallengeId", data.data.challengeId);
+    window?.localStorage.setItem("transferChallengeId", data.data.challengeId);
   } catch (error) {
     console.error(error);
     setError(error.message);
